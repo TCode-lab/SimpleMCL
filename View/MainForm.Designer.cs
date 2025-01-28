@@ -39,6 +39,7 @@ namespace SimpleMCL
             DebugButton = new ToolStripLabel();
             statusStrip1 = new StatusStrip();
             progressBar = new ToolStripProgressBar();
+            toolStripStatusLabel = new ToolStripStatusLabel();
             pictureBox1 = new PictureBox();
             assemblyNameLabel = new Label();
             gameButton = new Button();
@@ -101,7 +102,7 @@ namespace SimpleMCL
             // 
             // statusStrip1
             // 
-            statusStrip1.Items.AddRange(new ToolStripItem[] { progressBar });
+            statusStrip1.Items.AddRange(new ToolStripItem[] { progressBar, toolStripStatusLabel });
             statusStrip1.Location = new Point(0, 299);
             statusStrip1.Name = "statusStrip1";
             statusStrip1.Size = new Size(464, 22);
@@ -113,6 +114,14 @@ namespace SimpleMCL
             progressBar.Margin = new Padding(11, 3, 1, 3);
             progressBar.Name = "progressBar";
             progressBar.Size = new Size(334, 16);
+            // 
+            // toolStripStatusLabel
+            // 
+            toolStripStatusLabel.AutoSize = false;
+            toolStripStatusLabel.Margin = new Padding(5, 3, 0, 2);
+            toolStripStatusLabel.Name = "toolStripStatusLabel";
+            toolStripStatusLabel.Size = new Size(100, 17);
+            toolStripStatusLabel.Text = "Статус";
             // 
             // pictureBox1
             // 
@@ -141,7 +150,7 @@ namespace SimpleMCL
             gameButton.TabIndex = 5;
             gameButton.Text = "Играть";
             gameButton.UseVisualStyleBackColor = true;
-            gameButton.Click += gameButton_Click;
+            gameButton.Click += AssemblyTurnClick;
             // 
             // assembliesPanel
             // 
@@ -190,8 +199,8 @@ namespace SimpleMCL
             SizeGripStyle = SizeGripStyle.Hide;
             StartPosition = FormStartPosition.CenterScreen;
             Text = "SimpleMCL";
-            FormClosed += Form1_Closing;
-            Load += Form1_Load;
+            FormClosed += MainForm_Closing;
+            Load += MainForm_Load;
             toolStrip1.ResumeLayout(false);
             toolStrip1.PerformLayout();
             statusStrip1.ResumeLayout(false);
@@ -215,5 +224,6 @@ namespace SimpleMCL
         private FlowLayoutPanel assembliesPanel;
         private Button settingsButton;
         private Button deleteButton;
+        private ToolStripStatusLabel toolStripStatusLabel;
     }
 }

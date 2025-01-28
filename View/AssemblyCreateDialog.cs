@@ -1,14 +1,6 @@
 ﻿using SimpleMCL.Controller.Assemblies;
+using SimpleMCL.Controller.Settings;
 using SimpleMCL.Controller.Versions;
-using System;
-using System.Collections.Generic;
-using System.ComponentModel;
-using System.Data;
-using System.Drawing;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using System.Windows.Forms;
 
 namespace SimpleMCL.View
 {
@@ -62,36 +54,60 @@ namespace SimpleMCL.View
 
         private void Form2_Load(object sender, EventArgs e)
         {
+            releaseBox.Checked  = Configurations.activeConf.ReleaseVerFilter;
+            snapshotBox.Checked = Configurations.activeConf.SnapshotsVerFilter;
+            betaBox.Checked     = Configurations.activeConf.BetaVerFilter;
+            alphaBox.Checked    = Configurations.activeConf.AlphaVerFilter;
+
             LoadVersionsList();
+        }
+
+        private void AssemblyCreateDialog_FormClosed(object sender, FormClosedEventArgs e)
+        {
+            var newConf = Configurations.activeConf;
+
+            newConf.ReleaseVerFilter    = releaseBox.Checked;
+            newConf.SnapshotsVerFilter  = snapshotBox.Checked;
+            newConf.BetaVerFilter       = betaBox.Checked;
+            newConf.AlphaVerFilter      = alphaBox.Checked;
+
+            Configurations.activeConf = newConf;
         }
 
         private async void LoadVersionsList()
         {
-            if (AssemblyCreateDialog.firstLaunch)
+            try
             {
-                var updateResult = await VersionsController.UpdateVersionsMeta();
-                if (!updateResult) { MessageBox.Show("Ошибка обновления списка версий."); this.Close(); return; }
-                AssemblyCreateDialog.firstLaunch = false;
-            }
-
-            versionsList.Items.Clear();
-            var versions = VersionsController.GetAllVersionsMeta(
-                  releaseBox.Checked
-                , snapshotBox.Checked
-                , betaBox.Checked
-                , alphaBox.Checked
-                );
-
-            if (versions.Any())
-            {
-                foreach (var ver in versions)
+                if (AssemblyCreateDialog.firstLaunch)
                 {
-                    versionsList.Items.Add(ver.Name);
+                    var updateResult = await VersionsController.UpdateVersionsMeta();
+                    if (!updateResult) { MessageBox.Show("Ошибка обновления списка версий."); this.Close(); return; }
+                    AssemblyCreateDialog.firstLaunch = false;
+                }
+
+                versionsList.Items.Clear();
+                var versions = VersionsController.GetAllVersionsMeta(
+                      releaseBox.Checked
+                    , snapshotBox.Checked
+                    , betaBox.Checked
+                    , alphaBox.Checked
+                    );
+
+                if (versions.Any())
+                {
+                    foreach (var ver in versions)
+                    {
+                        versionsList.Items.Add(ver.Name);
+                    }
+                }
+                else
+                {
+                    versionsList.Items.Add("Список доступных версий пуст.");
                 }
             }
-            else
+            catch (Exception)
             {
-                versionsList.Items.Add("Список доступных версий пуст.");
+
             }
         }
 

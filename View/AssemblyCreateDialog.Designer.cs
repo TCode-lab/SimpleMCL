@@ -158,6 +158,7 @@
             StartPosition = FormStartPosition.CenterScreen;
             Text = "Form2";
             Load += Form2_Load;
+            FormClosed += AssemblyCreateDialog_FormClosed;
             panel1.ResumeLayout(false);
             ResumeLayout(false);
             PerformLayout();

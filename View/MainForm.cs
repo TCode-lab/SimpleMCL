@@ -1,8 +1,10 @@
 using SimpleMCL.Controller;
 using SimpleMCL.Controller.Assemblies;
+using SimpleMCL.Controller.Settings;
 using SimpleMCL.Model;
 using SimpleMCL.Model.UI;
 using SimpleMCL.View;
+using System.Resources;
 
 namespace SimpleMCL
 {
@@ -17,7 +19,7 @@ namespace SimpleMCL
 
         private void PickAssembly(object? sender, EventArgs e)
         {
-            if (sender is AssemblyCard card)
+            if (sender is AssemblyCard card && LauncherController.Status == LauncherStatus.waiting)
             {
                 currentAssembly = AssembliesController.GetAssemblyByIndex(card.assemblyId);
                 UpdateAssemblyControl();
@@ -35,7 +37,10 @@ namespace SimpleMCL
                     var assemblyCard = new AssemblyCard();
                     assemblyCard.Name = $"assemblyCard_{i}";
                     assemblyCard.UseVisualStyleBackColor = true;
-                    assemblyCard.Text = assembly.Name;
+                    assemblyCard.TextAlign = ContentAlignment.BottomCenter;
+                    //assemblyCard.BackgroundImage = 
+                    assemblyCard.BackgroundImageLayout = ImageLayout.Zoom;
+                    assemblyCard.Text = $"{assembly.Name}\n({assembly.Version})";
                     assemblyCard.assemblyId = i;
                     assemblyCard.Size = new Size(60, 60);
                     assemblyCard.Click += PickAssembly;
@@ -60,6 +65,16 @@ namespace SimpleMCL
 
             if (currentAssembly != null) { assemblyNameLabel.Text = currentAssembly.Name; }
             else { assemblyNameLabel.Text = "..."; }
+
+            if (LauncherController.Status == LauncherStatus.inGame)
+            {
+                gameButton.Enabled = true;
+                gameButton.Text = "Оставновить";
+            }
+            else
+            {
+                gameButton.Text = "Играть";
+            }
         }
 
         private void createAssemblyButton_Click(object sender, EventArgs e)
@@ -69,20 +84,45 @@ namespace SimpleMCL
             createForm.ShowDialog();
         }
 
-        private void Form1_Load(object sender, EventArgs e)
+        private void MainForm_Load(object sender, EventArgs e)
         {
             AssembliesController.Read();
             LauncherController.progressBar = progressBar;
+            LauncherController.statusLabel = toolStripStatusLabel;
+            LauncherController.LockAssemblyControlAction += LockAssemblyControl;
             UpdateAssembliesCards();
         }
 
-        private void Form1_Closing(object sender, FormClosedEventArgs e)
+        private void LockAssemblyControl(bool flag)
         {
-            AssembliesController.Write();
+            if (flag == true)
+            {
+                if (currentAssembly == null) { return; }
+                var crutch = currentAssembly;
+                currentAssembly = null;
+                UpdateAssemblyControl();
+                currentAssembly = crutch;
+                assemblyNameLabel.Text = currentAssembly.Name;
+            }
+            else
+            {
+                UpdateAssemblyControl();
+            }
         }
 
-        private async void gameButton_Click(object sender, EventArgs e)
+        private void MainForm_Closing(object sender, FormClosedEventArgs e)
         {
+            AssembliesController.Write();
+            ConfigurationsJson.Write(Configurations.activeConf);
+        }
+
+        private async void AssemblyTurnClick(object sender, EventArgs e)
+        {
+            if (LauncherController.Status == LauncherStatus.inGame)
+            {
+                LauncherController.CloseProcess();
+                return;
+            }
             if (currentAssembly != null)
             {
                 await LauncherController.InstallAssembly(currentAssembly);
